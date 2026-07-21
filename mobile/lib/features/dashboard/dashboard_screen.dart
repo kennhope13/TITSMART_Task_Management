@@ -54,7 +54,7 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 const Text('TITSMART QUẢN LÝ',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
-                Text('Quản lý: ${repo.currentUser?.name ?? "Quản lý"}',
+                Text('Xin chào: ${repo.currentUser?.name ?? "Quản lý"}',
                     style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
               ],
             ),
@@ -65,6 +65,7 @@ class DashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add_task, color: AppColors.primary),
+            tooltip: 'Tạo / Giao việc (+ Docs)',
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
             },
@@ -87,7 +88,7 @@ class DashboardScreen extends StatelessWidget {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
                   },
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text('Tạo công việc', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  label: const Text('Tạo việc (+ Docs)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: 10),
@@ -98,108 +99,71 @@ class DashboardScreen extends StatelessWidget {
                     side: const BorderSide(color: AppColors.primary),
                   ),
                   onPressed: () {
-                    if (onNavigateTab != null) onNavigateTab!(3); // Navigate to Reports
+                    if (onNavigateTab != null) onNavigateTab!(1);
                   },
-                  icon: const Icon(Icons.fact_check, color: AppColors.primary),
-                  label: Text('Chờ duyệt ($pendingApproval)', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  icon: const Icon(Icons.assignment, color: AppColors.primary),
+                  label: const Text('Xem danh sách', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-          // Stats Grid
-          const Text('THỐNG KÊ TỔNG QUAN',
+          // Overview KPI Grid
+          const Text('TỔNG QUAN HỆ THỐNG',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
           const SizedBox(height: 10),
-
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 1.5,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            children: [
-              _buildStatCard('Tổng công việc', '$total', AppColors.primary, Icons.inventory),
-              _buildStatCard('Đang làm', '$inProgress', AppColors.statusInProgressFg, Icons.pending),
-              _buildStatCard('Chờ duyệt', '$pendingApproval', AppColors.statusApprovalFg, Icons.fact_check),
-              _buildStatCard('Hoàn thành', '$completed', AppColors.statusCompletedFg, Icons.check_circle),
-              _buildStatCard('Cần sửa / Trễ', '$needsRevision', AppColors.error, Icons.warning),
-              _buildStatCard('Điểm danh', '18/24', AppColors.secondary, Icons.badge),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Urgent Alert Card
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.errorContainer.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.error),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: const [
-                    Icon(Icons.report_problem, color: AppColors.error),
-                    SizedBox(width: 8),
-                    Text('CẢNH BÁO KHẨN', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Text('• TS-1026: Kiểm tra PCCC cổng 2 - Quá hạn 2h (Phụ trách: Phạm Văn D)'),
-                const SizedBox(height: 4),
-                const Text('• TS-1025: Báo cáo bảo trì bị từ chối - Cần sửa gấp ảnh minh chứng'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Staff Monitoring Section
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('NẰM BẮT NHÂN SỰ HÔM NAY',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
-              TextButton(
-                onPressed: () {
-                  if (onNavigateTab != null) onNavigateTab!(2); // Staff tab
-                },
-                child: const Text('Xem tất cả >'),
-              ),
+              Expanded(child: _buildKpiCard('Tổng số việc', '$total', AppColors.primary, Icons.assignment)),
+              const SizedBox(width: 8),
+              Expanded(child: _buildKpiCard('Đang làm', '$inProgress', AppColors.statusInProgressFg, Icons.engineering)),
             ],
           ),
-          _buildStaffMiniItem('Nguyễn Văn An', 'Check-in: 08:05 • Đang làm việc', 'Online', Colors.green),
-          _buildStaffMiniItem('Trần Thị B', 'Check-in: 08:15 • Nghỉ giải lao', 'Break', Colors.orange),
-          _buildStaffMiniItem('Lê Văn C', 'Chưa check-in', 'Offline', Colors.grey),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _buildKpiCard('Chờ nghiệm thu', '$pendingApproval', AppColors.statusApprovalFg, Icons.rate_review)),
+              const SizedBox(width: 8),
+              Expanded(child: _buildKpiCard('Hoàn thành', '$completed', Colors.green[700]!, Icons.check_circle)),
+            ],
+          ),
+          if (needsRevision > 0) ...[
+            const SizedBox(height: 8),
+            _buildKpiCard('Cần sửa đổi', '$needsRevision', AppColors.error, Icons.warning_amber),
+          ],
+          const SizedBox(height: 20),
+
+          // Staff Status Mini List
+          const Text('TRẠM & ĐỘI THỰC HIỆN HÔM NAY',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
+          const SizedBox(height: 10),
+          _buildStaffMiniItem('Trần Thị B', 'Khu Công Nghệ Cao Q9 - Đang làm TS-1024', 'Đang làm', AppColors.statusInProgressFg),
+          _buildStaffMiniItem('Lê Văn C', 'Tòa nhà TITSMART - Đã gửi báo cáo', 'Chờ duyệt', AppColors.statusApprovalFg),
+          _buildStaffMiniItem('Phạm Văn D', 'Trạm khu vực Quận 1 - Chờ giao việc', 'Sẵn sàng', Colors.blue),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+  Widget _buildKpiCard(String title, String value, Color color, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border(left: BorderSide(color: color, width: 4)),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.outline)),
-          const Spacer(),
+          Text(title, style: const TextStyle(fontSize: 12, color: AppColors.outline)),
+          const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
-              Icon(icon, color: color.withOpacity(0.4)),
+              Icon(icon, color: color.withValues(alpha: 0.4)),
             ],
           ),
         ],
@@ -214,11 +178,11 @@ class DashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.4)),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
-          CircleAvatar(backgroundColor: color.withOpacity(0.2), child: Text(name[0])),
+          CircleAvatar(backgroundColor: color.withValues(alpha: 0.2), child: Text(name[0])),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -231,7 +195,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
             child: Text(badge, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 11)),
           ),
         ],
@@ -271,6 +235,15 @@ class DashboardScreen extends StatelessWidget {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.post_add, color: AppColors.primary, size: 26),
+            tooltip: 'Tạo công việc mới kèm file tài liệu',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -320,6 +293,18 @@ class DashboardScreen extends StatelessWidget {
 
           _buildQuickActionButton(
             context,
+            title: 'Tạo / Khởi tạo việc mới (+ PDF, XLSX, CSV, DOCX)',
+            subtitle: 'Kèm tài liệu đính kèm',
+            icon: Icons.post_add,
+            color: AppColors.primary,
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
+            },
+          ),
+          const SizedBox(height: 10),
+
+          _buildQuickActionButton(
+            context,
             title: 'Điểm danh đầu ca (GPS + Selfie)',
             subtitle: 'Xác nhận vị trí hiện trường',
             icon: Icons.my_location,
@@ -332,10 +317,10 @@ class DashboardScreen extends StatelessWidget {
           if (inProgress.isNotEmpty) ...[
             _buildQuickActionButton(
               context,
-              title: 'Việc đang làm: ${inProgress.first.code}',
-              subtitle: inProgress.first.title,
-              icon: Icons.play_circle_fill,
-              color: AppColors.primary,
+              title: 'Gửi báo cáo công việc: ${inProgress.first.code}',
+              subtitle: 'Upload ảnh & file tài liệu đính kèm',
+              icon: Icons.send,
+              color: AppColors.secondary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -366,7 +351,7 @@ class DashboardScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
+              border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
             ),
             child: Row(
               children: const [
@@ -377,7 +362,7 @@ class DashboardScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Nhiệm vụ mới được giao: TS-1024', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text('Vui lòng kiểm tra và bấm Bắt đầu công việc.',
+                      Text('Vui lòng kiểm tra và đính kèm báo cáo PDF/XLSX/CSV/DOCX khi hoàn thành.',
                           style: TextStyle(fontSize: 12, color: AppColors.outline)),
                     ],
                   ),
@@ -396,9 +381,10 @@ class DashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.5)),
+        border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontSize: 11, color: AppColors.outline)),
           const SizedBox(height: 4),
@@ -418,32 +404,35 @@ class DashboardScreen extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.5)),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+          border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
-              child: Icon(icon, color: color),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                   Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.outline)),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: color),
+            const Icon(Icons.chevron_right, color: AppColors.outline),
           ],
         ),
       ),

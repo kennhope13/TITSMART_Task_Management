@@ -49,7 +49,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       if (_selectedFilter == 'Chờ duyệt') return task.status == 'pending_approval';
       if (_selectedFilter == 'Cần sửa') return task.status == 'needs_revision';
       if (_selectedFilter == 'Hoàn thành') return task.status == 'completed';
-      if (_selectedFilter == 'Trễ hạn') return task.status == 'needs_revision'; // or deadline logic
+      if (_selectedFilter == 'Trễ hạn') return task.status == 'needs_revision';
       return true;
     }).toList();
 
@@ -60,16 +60,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
-        actions: isManager
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.add, color: AppColors.primary),
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
-                  },
-                ),
-              ]
-            : null,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.post_add, color: AppColors.primary, size: 26),
+            tooltip: 'Tạo / Giao việc kèm tài liệu (PDF, XLSX, CSV, DOCX)',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -97,7 +96,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: AppColors.outlineVariant.withOpacity(0.5)),
+                      borderSide: BorderSide(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
                     ),
                   ),
                 ),
@@ -152,16 +151,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ],
       ),
-      floatingActionButton: isManager
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
-              },
-              backgroundColor: AppColors.primary,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('Tạo công việc', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
+        },
+        backgroundColor: isManager ? AppColors.primary : AppColors.secondary,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Tạo / Giao việc (+ Docs)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 }
