@@ -21,6 +21,11 @@ class AppRepository extends ChangeNotifier {
   List<String> teams = [];
   Map<String, dynamic> dashboardSummary = {};
 
+  /// Compatibility method for app initialization
+  void initializeDemoData() {
+    tryAutoLogin();
+  }
+
   /// Try auto-login on app startup if a saved token exists
   Future<bool> tryAutoLogin() async {
     final token = await ApiClient.getToken();
@@ -236,4 +241,123 @@ class AppRepository extends ChangeNotifier {
   }
 
   int get unreadNotificationCount => notifications.where((n) => !n.isRead).length;
+
+  // ====================================================
+  // COMPATIBILITY METHODS (called by UI screens)
+  // ====================================================
+
+  /// Toggle lock/unlock a staff member
+  Future<void> toggleLockStaff(int userId) async {
+    final staff = staffList.firstWhere((s) => s.id == userId, orElse: () => staffList.first);
+    if (staff.isLocked) {
+      await unlockStaff(userId);
+    } else {
+      await lockStaff(userId);
+    }
+  }
+
+  /// Add a new staff member via POST /api/v1/users
+  Future<ApiResponse<dynamic>> addStaff(UserModel newUser) async {
+    final res = await ApiClient.post(ApiEndpoints.users, {
+      'name': newUser.name,
+      'email': newUser.email,
+      'role': newUser.role,
+      'employee_code': newUser.employeeCode,
+      'phone': newUser.phone,
+      'password': 'Titsmart@123',
+    });
+    if (res.success) {
+      await fetchStaff();
+    }
+    return res;
+  }
+
+  /// Approve a task's completion report (by task ID)
+  Future<void> approveTaskReport(int taskId) async {
+    await ApiClient.post('${ApiEndpoints.tasks}/$taskId/approve', {});
+    await fetchTasks();
+  }
+
+  /// Reject a task's completion report (by task ID)
+  Future<void> rejectTaskReport(int taskId, String reason) async {
+    await ApiClient.post('${ApiEndpoints.tasks}/$taskId/reject', {
+      'rejection_reason': reason,
+    });
+    await fetchTasks();
+  }
+
+  /// Mark a notification as read
+  Future<void> markNotificationAsRead(int notificationId) async {
+    final idx = notifications.indexWhere((n) => n.id == notificationId);
+    if (idx != -1) {
+      notifications[idx] = notifications[idx].copyWith(isRead: true);
+      notifyListeners();
+    }
+    await ApiClient.post('${ApiEndpoints.notifications}/$notificationId/read', {});
+  }
+
+  /// Create a new task via POST /api/v1/tasks
+  Future<ApiResponse<dynamic>> createTask({
+    required String title,
+    required String description,
+    required String location,
+    String? coordinates,
+    required String deadline,
+    required String teamName,
+    required String workerName,
+    required String managerName,
+    required String priority,
+    String? notes,
+  }) async {
+    final res = await ApiClient.post(ApiEndpoints.tasks, {
+      'title': title,
+      'description': description,
+      'location': location,
+      'coordinates': coordinates,
+      'deadline': deadline,
+      'team_name': teamName,
+      'worker_name': workerName,
+      'manager_name': managerName,
+      'priority': priority,
+      'notes': notes,
+    });
+    if (res.success) {
+      await fetchTasks();
+    }
+    return res;
+  }
+
+  /// Cancel a task via POST /api/v1/tasks/{id}/cancel
+  Future<void> cancelTask(int taskId) async {
+    await ApiClient.post('${ApiEndpoints.tasks}/$taskId/cancel', {});
+    await fetchTasks();
+  }
+
+  /// Reassign a task to a different worker
+  Future<void> reassignTask(int taskId, String workerName, String teamName) async {
+    await ApiClient.post('${ApiEndpoints.tasks}/$taskId/reassign', {
+      'worker_name': workerName,
+      'team_name': teamName,
+    });
+    await fetchTasks();
+  }
+
+  /// Submit completion report with images and documents
+  Future<ApiResponse<dynamic>> submitCompletionReport(
+    int taskId,
+    String notes,
+    List<String> photos,
+    List<dynamic> documents,
+  ) async {
+    final res = await ApiClient.post(ApiEndpoints.completionReports, {
+      'task_id': taskId,
+      'notes': notes,
+      'photo_count': photos.length,
+      'document_count': documents.length,
+    });
+    if (res.success) {
+      await fetchTasks();
+    }
+    return res;
+  }
 }

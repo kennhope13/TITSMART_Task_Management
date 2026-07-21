@@ -25,4 +25,23 @@ class NotificationModel {
       type: json['type'] ?? 'task',
     );
   }
+
+  NotificationModel copyWith({
+    int? id,
+    String? title,
+    String? content,
+    String? time,
+    bool? isRead,
+    String? type,
+  }) {
+    return NotificationModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      time: time ?? this.time,
+      isRead: isRead ?? this.isRead,
+      type: type ?? this.type,
+    );
+  }
 }
+

@@ -8,7 +8,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   final repo = AppRepository();
-  repo.initializeDemoData();
+  await repo.tryAutoLogin();
 
   runApp(const TitSmartApp());
 }
