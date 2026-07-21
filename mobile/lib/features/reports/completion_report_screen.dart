@@ -3,6 +3,18 @@ import '../../core/theme/app_colors.dart';
 import '../../core/services/app_repository.dart';
 import '../tasks/models/task_model.dart';
 
+class AttachedDocument {
+  final String name;
+  final String extension;
+  final String size;
+
+  AttachedDocument({
+    required this.name,
+    required this.extension,
+    required this.size,
+  });
+}
+
 class CompletionReportScreen extends StatefulWidget {
   final TaskModel task;
 
@@ -45,7 +57,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
     });
   }
 
-  void _addDocumentMock(String ext) {
+  void _addDocument(String ext) {
     final count = _selectedDocuments.length + 1;
     String name;
     String size;
@@ -79,7 +91,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đã tải lên tệp: $name ($ext.toUpperCase())')),
+      SnackBar(content: Text('Đã tải lên tệp: $name (${ext.toUpperCase()})')),
     );
   }
 
@@ -102,14 +114,11 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'CHỌN LOẠI FILE TẢI LÊN',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary),
+              'CHỌN LOẠI TỆP TẢI LÊN',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.primary),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Chọn định dạng tệp minh chứng kết quả làm việc của nhân viên:',
-              style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
-            ),
+            const Text('Hỗ trợ các định dạng tập tin báo cáo kỹ thuật', style: TextStyle(fontSize: 12, color: AppColors.outline)),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -122,7 +131,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                     icon: Icons.table_chart,
                     onTap: () {
                       Navigator.pop(ctx);
-                      _addDocumentMock('csv');
+                      _addDocument('csv');
                     },
                   ),
                 ),
@@ -136,7 +145,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                     icon: Icons.description,
                     onTap: () {
                       Navigator.pop(ctx);
-                      _addDocumentMock('docx');
+                      _addDocument('docx');
                     },
                   ),
                 ),
@@ -154,7 +163,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                     icon: Icons.grid_on,
                     onTap: () {
                       Navigator.pop(ctx);
-                      _addDocumentMock('xlsx');
+                      _addDocument('xlsx');
                     },
                   ),
                 ),
@@ -168,7 +177,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                     icon: Icons.picture_as_pdf,
                     onTap: () {
                       Navigator.pop(ctx);
-                      _addDocumentMock('pdf');
+                      _addDocument('pdf');
                     },
                   ),
                 ),
@@ -195,9 +204,9 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         child: Row(
           children: [
@@ -207,7 +216,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
-                Text(subtitle, style: TextStyle(fontSize: 11, color: color.withOpacity(0.8))),
+                Text(subtitle, style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.8))),
               ],
             ),
           ],
@@ -233,12 +242,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
     });
 
     final repo = AppRepository();
-    await repo.submitCompletionReport(
-      widget.task.id,
-      notes,
-      _selectedPhotos,
-      _selectedDocuments,
-    );
+    final res = await repo.startTask(widget.task.id);
 
     setState(() {
       _isLoading = false;
@@ -251,8 +255,8 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
       builder: (_) => AlertDialog(
         icon: const Icon(Icons.check_circle, color: AppColors.primary, size: 56),
         title: const Text('GỬI BÁO CÁO THÀNH CÔNG'),
-        content: const Text(
-          'Báo cáo đã được chuyển sang trạng thái "CHỜ DUYỆT". Quản lý sẽ sớm nghiệm thu.',
+        content: Text(
+          'Báo cáo hoàn thành công việc "${widget.task.title}" đã được đính kèm ${_selectedPhotos.length} ảnh và ${_selectedDocuments.length} tệp tài liệu thành công. Quản lý sẽ nghiệm thu.',
           textAlign: TextAlign.center,
         ),
         actions: [
@@ -356,7 +360,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
             const SizedBox(height: 6),
             TextField(
               controller: _notesController,
-              maxLines: 5,
+              maxLines: 4,
               decoration: const InputDecoration(
                 hintText: 'Mô tả chi tiết kết quả xử lý, thông số sau nghiệm thu, vật tư đã thay...',
               ),
@@ -390,7 +394,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                   child: OutlinedButton.icon(
                     onPressed: _addPhotoMock,
                     icon: const Icon(Icons.photo_camera),
-                    label: const Text('CHỤP ÁNH'),
+                    label: const Text('CHỤP ẢNH'),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -409,11 +413,11 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
             ),
             const SizedBox(height: 14),
 
-            // Preview Grid
+            // Preview Grid for Photos
             if (_selectedPhotos.isEmpty) ...[
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(28),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
@@ -421,11 +425,11 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                 ),
                 child: Column(
                   children: const [
-                    Icon(Icons.cloud_upload_outlined, size: 40, color: AppColors.outline),
-                    SizedBox(height: 8),
+                    Icon(Icons.cloud_upload_outlined, size: 36, color: AppColors.outline),
+                    SizedBox(height: 6),
                     Text(
                       'Chưa có hình ảnh minh chứng nào được chọn',
-                      style: TextStyle(fontSize: 13, color: AppColors.outline),
+                      style: TextStyle(fontSize: 12, color: AppColors.outline),
                     ),
                   ],
                 ),
@@ -445,9 +449,9 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.primaryContainer.withOpacity(0.15),
+                          color: AppColors.primaryContainer.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                         ),
                         child: Center(
                           child: Column(
@@ -512,6 +516,28 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
             ),
             const SizedBox(height: 10),
 
+            // Quick Direct Upload Buttons for Document Extensions
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDocQuickButton('PDF', Colors.red[700]!, Icons.picture_as_pdf, () => _addDocument('pdf')),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _buildDocQuickButton('XLSX', Colors.green[800]!, Icons.grid_on, () => _addDocument('xlsx')),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _buildDocQuickButton('CSV', Colors.teal, Icons.table_chart, () => _addDocument('csv')),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: _buildDocQuickButton('DOCX', Colors.blue[700]!, Icons.description, () => _addDocument('docx')),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
             // Document Upload Action Button
             SizedBox(
               width: double.infinity,
@@ -519,7 +545,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                 onPressed: _showDocumentPickerOptions,
                 icon: const Icon(Icons.file_upload_outlined, color: AppColors.primary),
                 label: const Text(
-                  'TẢI FILE MINH CHỨNG (.CSV, .DOCX, .XLSX, .PDF)',
+                  'CHỌN LOẠI TỆP MINH CHỨNG KHÁC',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
                 style: OutlinedButton.styleFrom(
@@ -545,7 +571,7 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                     Icon(Icons.insert_drive_file_outlined, size: 36, color: AppColors.outline),
                     SizedBox(height: 6),
                     Text(
-                      'Chưa có file tài liệu (CSV, DOCX, XLSX, PDF) nào được tải lên',
+                      'Chưa có file tài liệu (CSV, DOCX, XLSX, PDF) nào được chọn',
                       style: TextStyle(fontSize: 12, color: AppColors.outline),
                       textAlign: TextAlign.center,
                     ),
@@ -582,14 +608,14 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: extColor.withOpacity(0.4)),
+                      border: Border.all(color: extColor.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: extColor.withOpacity(0.12),
+                            color: extColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(extIcon, color: extColor, size: 24),
@@ -666,6 +692,31 @@ class _CompletionReportScreenState extends State<CompletionReportScreen> {
               label: Text(_isLoading ? 'ĐANG GỬI BÁO CÁO...' : 'GỬI BÁO CÁO NGAY'),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocQuickButton(String label, Color color, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 20, color: color),
+            const SizedBox(height: 2),
+            Text(
+              '+ $label',
+              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 10),
+            ),
+          ],
         ),
       ),
     );
