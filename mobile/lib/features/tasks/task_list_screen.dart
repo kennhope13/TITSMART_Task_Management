@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/services/app_repository.dart';
 import '../../shared/widgets/task_card.dart';
+import '../reports/completion_report_screen.dart';
 import 'create_task_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
@@ -53,6 +54,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
       return true;
     }).toList();
 
+    final activeWorkerTask = repo.tasks.firstWhere(
+      (t) => t.status == 'in_progress' || t.status == 'needs_revision',
+      orElse: () => repo.tasks.first,
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -60,15 +66,17 @@ class _TaskListScreenState extends State<TaskListScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.post_add, color: AppColors.primary, size: 26),
-            tooltip: 'Tạo / Giao việc kèm tài liệu (PDF, XLSX, CSV, DOCX)',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
-            },
-          ),
-        ],
+        actions: isManager
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.post_add, color: AppColors.primary, size: 26),
+                  tooltip: 'Tạo / Giao việc kèm tài liệu (PDF, XLSX, CSV, DOCX)',
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
+                  },
+                ),
+              ]
+            : null,
       ),
       body: Column(
         children: [
@@ -151,14 +159,26 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
-        },
-        backgroundColor: isManager ? AppColors.primary : AppColors.secondary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Tạo / Giao việc (+ Docs)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
+      floatingActionButton: isManager
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
+              },
+              backgroundColor: AppColors.primary,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text('Giao việc (+ Docs)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            )
+          : FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CompletionReportScreen(task: activeWorkerTask)),
+                );
+              },
+              backgroundColor: AppColors.secondary,
+              icon: const Icon(Icons.send, color: Colors.white),
+              label: const Text('Tạo Báo Cáo (+ Docs)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
     );
   }
 }

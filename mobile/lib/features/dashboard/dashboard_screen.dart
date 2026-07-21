@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/services/app_repository.dart';
+import '../reports/completion_report_screen.dart';
 import '../tasks/create_task_screen.dart';
 import '../tasks/task_detail_screen.dart';
 
@@ -65,7 +66,7 @@ class DashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add_task, color: AppColors.primary),
-            tooltip: 'Tạo / Giao việc (+ Docs)',
+            tooltip: 'Giao việc kèm tài liệu (PDF, XLSX, CSV, DOCX)',
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
             },
@@ -88,7 +89,7 @@ class DashboardScreen extends StatelessWidget {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
                   },
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text('Tạo việc (+ Docs)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  label: const Text('Giao việc (+ Docs)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: 10),
@@ -212,6 +213,10 @@ class DashboardScreen extends StatelessWidget {
     final pendingApproval = tasks.where((t) => t.status == 'pending_approval').length;
     final needsRevision = tasks.where((t) => t.status == 'needs_revision').length;
 
+    final targetTaskForReport = inProgress.isNotEmpty
+        ? inProgress.first
+        : (tasks.isNotEmpty ? tasks.first : null);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -235,15 +240,6 @@ class DashboardScreen extends StatelessWidget {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.post_add, color: AppColors.primary, size: 26),
-            tooltip: 'Tạo công việc mới kèm file tài liệu',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
-            },
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -291,16 +287,20 @@ class DashboardScreen extends StatelessWidget {
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
           const SizedBox(height: 10),
 
-          _buildQuickActionButton(
-            context,
-            title: 'Tạo / Khởi tạo việc mới (+ PDF, XLSX, CSV, DOCX)',
-            subtitle: 'Kèm tài liệu đính kèm',
-            icon: Icons.post_add,
-            color: AppColors.primary,
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
-            },
-          ),
+          if (targetTaskForReport != null)
+            _buildQuickActionButton(
+              context,
+              title: 'Tạo Báo cáo hoàn thành (+ PDF, XLSX, CSV, DOCX)',
+              subtitle: 'Đính kèm ảnh & file tài liệu minh chứng',
+              icon: Icons.assignment_turned_in,
+              color: AppColors.primary,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CompletionReportScreen(task: targetTaskForReport)),
+                );
+              },
+            ),
           const SizedBox(height: 10),
 
           _buildQuickActionButton(
@@ -314,12 +314,13 @@ class DashboardScreen extends StatelessWidget {
             },
           ),
           const SizedBox(height: 10),
+
           if (inProgress.isNotEmpty) ...[
             _buildQuickActionButton(
               context,
-              title: 'Gửi báo cáo công việc: ${inProgress.first.code}',
-              subtitle: 'Upload ảnh & file tài liệu đính kèm',
-              icon: Icons.send,
+              title: 'Xem việc đang làm: ${inProgress.first.code}',
+              subtitle: inProgress.first.title,
+              icon: Icons.play_circle_fill,
               color: AppColors.secondary,
               onTap: () {
                 Navigator.push(
