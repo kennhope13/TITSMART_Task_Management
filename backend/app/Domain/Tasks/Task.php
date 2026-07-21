@@ -61,15 +61,15 @@ class Task extends Model
     public static function getStatusColor(string $status): string
     {
         return match ($status) {
-            'draft' => 'gray',             // Nháp: xám
-            'pending_assignment' => 'warning', // Chờ phân công: vàng
-            'assigned_manager' => 'info',    // Đã giao Quản lý: xanh dương nhạt
-            'assigned_worker' => 'primary',  // Đã giao Thợ: xanh dương
-            'in_progress' => 'purple',       // Đang làm: tím
-            'pending_approval' => 'orange',  // Chờ duyệt: cam
-            'completed' => 'success',        // Hoàn thành: xanh lá
-            'needs_revision' => 'danger',    // Cần sửa đổi: đỏ
-            'cancelled' => 'slate',          // Hủy: xám đậm
+            'draft' => 'gray',
+            'pending_assignment' => 'warning',
+            'assigned_manager' => 'info',
+            'assigned_worker' => 'primary',
+            'in_progress' => 'purple',
+            'pending_approval' => 'orange',
+            'completed' => 'success',
+            'needs_revision' => 'danger',
+            'cancelled' => 'slate',
             default => 'secondary',
         };
     }

@@ -1,6 +1,8 @@
-# Cấu trúc source code
+# TITSMART Task Management
 
-Stack đã chốt:
+Hệ thống quản lý công việc nội bộ cho mô hình Sếp -> Quản lý -> Thợ hiện trường.
+
+## Stack đã chốt
 
 - Backend + Web Admin: Laravel + Filament
 - Mobile App: Flutter
@@ -12,18 +14,35 @@ Stack đã chốt:
 ## Cây thư mục chính
 
 ```text
-source_code/
-├── backend/                  # Laravel: Web Admin + API cho mobile
-├── mobile/                   # Flutter app cho Thợ/Quản lý hiện trường
-├── infra/                    # Cấu hình triển khai VPS/Nginx/Supervisor/Docker
-└── docs/                     # Tài liệu kỹ thuật API, database, deployment
+TITSMART_Task_Management/
+├── backend/    # Laravel: Web Admin + API cho mobile
+├── mobile/     # Flutter app cho Thợ/Quản lý hiện trường
+├── infra/      # Cấu hình deploy VPS/Nginx/Supervisor/Docker
+└── docs/       # Tài liệu kỹ thuật API, database, deployment
 ```
 
-## Quy ước triển khai
+## Backend
 
-- `backend` quản lý toàn bộ nghiệp vụ lõi: tài khoản, đội nhóm, công việc, điểm danh, báo cáo, thông báo.
-- `backend/app/Filament` dùng cho Web Admin của Sếp và Quản lý.
-- `backend/app/Http/Controllers/Api/V1` dùng cho API mobile Flutter.
-- `mobile/lib/features` chia theo nghiệp vụ trên app.
-- `infra` chỉ chứa cấu hình triển khai, không chứa secret thật.
+```powershell
+cd backend
+php artisan serve --host=127.0.0.1 --port=8010
+```
 
+Web Admin:
+
+```text
+http://127.0.0.1:8010/admin
+```
+
+API mobile:
+
+```text
+http://127.0.0.1:8010/api/v1
+```
+
+## Ghi chú triển khai
+
+- Web Admin dùng cho Sếp và Quản lý.
+- Mobile app dùng cho Thợ hiện trường.
+- Backend kiểm tra phân quyền ở API, không chỉ ẩn nút trên giao diện.
+- Ảnh điểm danh và ảnh báo cáo lưu trên disk/storage, database chỉ lưu đường dẫn.

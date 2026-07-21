@@ -1,24 +1,30 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AttendanceController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CompletionReportController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::get('/health', fn () => ['status' => 'ok']);
 
-    // Auth
-    // POST /api/v1/auth/login
-    // POST /api/v1/auth/logout
-    // GET  /api/v1/me
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
-    // Mobile task workflow
-    // GET  /api/v1/tasks
-    // GET  /api/v1/tasks/{task}
-    // POST /api/v1/tasks/{task}/start
-    // POST /api/v1/attendance/check-in
-    // POST /api/v1/tasks/{task}/completion-reports
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-    // Notifications
-    // GET  /api/v1/notifications
-    // POST /api/v1/notifications/{notification}/read
+        Route::get('/tasks', [TaskController::class, 'index']);
+        Route::get('/tasks/{task}', [TaskController::class, 'show']);
+        Route::post('/tasks/{task}/start', [TaskController::class, 'start']);
+        Route::post('/tasks/{task}/completion-reports', [CompletionReportController::class, 'store']);
+
+        Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']);
+
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    });
 });
 
