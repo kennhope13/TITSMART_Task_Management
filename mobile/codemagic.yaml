@@ -1,0 +1,21 @@
+workflows:
+  ios-release:
+    name: TITSMART Mobile iOS Release Build
+    instance_type: mac_mini_m1
+    max_build_duration: 60
+    environment:
+      flutter: 3.29.0
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up dependencies
+        script: |
+          cd mobile
+          flutter pub get
+      - name: Build iOS Release IPA
+        script: |
+          cd mobile
+          flutter build ipa --release --no-codesign
+    artifacts:
+      - mobile/build/ios/ipa/*.ipa
+      - mobile/build/ios/iphoneos/Runner.app

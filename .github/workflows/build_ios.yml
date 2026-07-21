@@ -1,0 +1,50 @@
+name: Build TITSMART Mobile iOS (.IPA)
+
+on:
+  push:
+    branches: [ main, master, "feature/*" ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build iOS IPA Bundle
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          cd mobile
+          flutter pub get
+
+      - name: Build iOS Bundle (--no-codesign)
+        run: |
+          cd mobile
+          flutter build ios --release --no-codesign
+
+      - name: Package Payload to .IPA
+        run: |
+          mkdir -p mobile/build/ios/iphoneos/Payload
+          cp -r mobile/build/ios/iphoneos/Runner.app mobile/build/ios/iphoneos/Payload/
+          cd mobile/build/ios/iphoneos
+          zip -r TITSMART_Task_Management_v1.0.ipa Payload
+
+      - name: Upload iOS IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TITSMART_iOS_App_v1.0
+          path: mobile/build/ios/iphoneos/TITSMART_Task_Management_v1.0.ipa

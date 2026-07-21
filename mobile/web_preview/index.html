@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TITSMART Mobile App - Interactive UI Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#003FB1',
+            'primary-container': '#1A56DB',
+            'on-primary': '#FFFFFF',
+            background: '#FAF8FF',
+            surface: '#FFFFFF',
+            'surface-container': '#EDEDF8',
+            'surface-container-low': '#F3F3FE',
+            'on-surface': '#191B23',
+            'on-surface-variant': '#434654',
+            outline: '#737686',
+            'outline-variant': '#C3C5D7',
+            error: '#BA1A1A',
+            'error-container': '#FFDAD6',
+            // Task status colors
+            statusPendingBg: '#DBE1FF', statusPendingFg: '#00174D',
+            statusInProgressBg: '#FFDBCF', statusInProgressFg: '#802A00',
+            statusApprovalBg: '#EDE9FE', statusApprovalFg: '#5B21B6',
+            statusCompletedBg: '#D1FAE5', statusCompletedFg: '#065F46',
+            statusRevisionBg: '#FFDAD6', statusRevisionFg: '#93000A',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; vertical-align: middle; }
+    .active-icon { font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .phone-frame {
+      width: 390px;
+      height: 844px;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 12px #1e293b;
+      overflow: hidden;
+      position: relative;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+  <!-- Desktop Header Controls -->
+  <div class="mb-4 text-center max-w-xl">
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <span class="material-symbols-outlined text-blue-400 text-3xl">precision_manufacturing</span>
+      <h1 class="text-2xl font-bold text-white">TITSMART Mobile App UI Prototype</h1>
+    </div>
+    <p class="text-xs text-slate-400">Trải nghiệm tương tác trực tiếp 8 màn hình Flutter App Quản lý công việc ngoài hiện trường</p>
+  </div>
+
+  <!-- Mobile Phone Device Frame Container -->
+  <div class="phone-frame bg-background text-on-surface flex flex-col relative">
+
+    <!-- Status Bar (Top iOS/Android notch simulated) -->
+    <div class="bg-surface px-6 pt-3 pb-1 flex justify-between items-center text-xs font-semibold text-slate-700 z-50 select-none">
+      <span>09:41</span>
+      <div class="w-20 h-4 bg-black rounded-full mx-auto -mt-2 opacity-80"></div>
+      <div class="flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">signal_cellular_4_bar</span>
+        <span class="material-symbols-outlined text-sm">wifi</span>
+        <span class="material-symbols-outlined text-sm">battery_full</span>
+      </div>
+    </div>
+
+    <!-- MAIN APP SCREEN CONTENT VIEWPORT -->
+    <div class="flex-1 overflow-y-auto relative hide-scrollbar" id="screenContainer">
+
+      <!-- ================= 1. SCREEN: LOGIN ================= -->
+      <div id="screen-login" class="screen-page min-h-full flex flex-col justify-center p-6 bg-background">
+        <div class="flex flex-col items-center mb-8">
+          <div class="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center shadow-lg mb-3">
+            <span class="material-symbols-outlined text-4xl text-white active-icon">precision_manufacturing</span>
+          </div>
+          <h2 class="text-2xl font-bold text-primary tracking-tight">TITSMART</h2>
+          <p class="text-[10px] font-bold text-outline tracking-[0.2em]">INDUSTRIAL SOLUTIONS</p>
+        </div>
+
+        <div class="bg-surface p-5 rounded-2xl border border-outline-variant shadow-md">
+          <h3 class="text-lg font-bold text-center text-on-surface mb-1">Đăng nhập hệ thống</h3>
+          <p class="text-xs text-center text-on-surface-variant mb-5">Vui lòng nhập thông tin để tiếp tục</p>
+
+          <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Email hoặc Mã nhân viên</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-lg">person</span>
+                <input type="text" id="loginUser" value="worker1@titsmart.com" required class="w-full pl-10 pr-3 py-2.5 bg-white border border-outline-variant rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Mật khẩu</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-lg">lock</span>
+                <input type="password" id="loginPass" value="password" required class="w-full pl-10 pr-10 py-2.5 bg-white border border-outline-variant rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                <button type="button" onclick="togglePassVis()" class="absolute right-3 top-2 text-outline">
+                  <span class="material-symbols-outlined text-lg" id="passVisIcon">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <a href="#" class="text-xs text-primary font-semibold hover:underline">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" id="btnLogin" class="w-full py-3 bg-primary text-white font-bold text-sm rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
+              <span>ĐĂNG NHẬP</span>
+              <span class="material-symbols-outlined text-lg">login</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="mt-8 text-center text-[11px] text-outline">
+          <p>© 2024 TITSMART Technology</p>
+          <p>Version 2.4.0 (Industrial Mobile Build)</p>
+        </div>
+      </div>
+
+      <!-- ================= 2. SCREEN: DASHBOARD ================= -->
+      <div id="screen-dashboard" class="screen-page hidden p-4 space-y-4 pb-20">
+        <!-- User Banner -->
+        <div class="bg-gradient-to-br from-primary to-primary-container p-4 rounded-2xl text-white shadow-md flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl active-icon">person</span>
+          </div>
+          <div>
+            <p class="text-xs text-white/80">Xin chào,</p>
+            <h3 class="text-base font-bold">NGUYỄN VĂN AN</h3>
+            <p class="text-[11px] text-white/90">Mã NV: NV-2024-889 • Thợ chính / Quản lý tổ đội</p>
+          </div>
+        </div>
+
+        <!-- KPI Stats Grid -->
+        <div>
+          <h4 class="text-xs font-bold text-outline uppercase tracking-wider mb-2">THỐNG KÊ CÔNG VIỆC</h4>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div onclick="switchTab('tasks', 'Chờ thực hiện')" class="bg-statusPendingBg border border-statusPendingFg/20 p-3 rounded-xl cursor-pointer active:scale-95 transition-transform">
+              <div class="flex justify-between items-center text-statusPendingFg mb-2">
+                <span class="text-xs font-bold">Chờ thực hiện</span>
+                <span class="material-symbols-outlined text-lg">assignment</span>
+              </div>
+              <span class="text-2xl font-bold text-statusPendingFg">1</span>
+            </div>
+
+            <div onclick="switchTab('tasks', 'Đang làm')" class="bg-statusInProgressBg border border-statusInProgressFg/20 p-3 rounded-xl cursor-pointer active:scale-95 transition-transform">
+              <div class="flex justify-between items-center text-statusInProgressFg mb-2">
+                <span class="text-xs font-bold">Đang làm</span>
+                <span class="material-symbols-outlined text-lg">engineering</span>
+              </div>
+              <span class="text-2xl font-bold text-statusInProgressFg">1</span>
+            </div>
+
+            <div onclick="switchTab('tasks', 'Chờ duyệt')" class="bg-statusApprovalBg border border-statusApprovalFg/20 p-3 rounded-xl cursor-pointer active:scale-95 transition-transform">
+              <div class="flex justify-between items-center text-statusApprovalFg mb-2">
+                <span class="text-xs font-bold">Chờ duyệt</span>
+                <span class="material-symbols-outlined text-lg">rate_review</span>
+              </div>
+              <span class="text-2xl font-bold text-statusApprovalFg">1</span>
+            </div>
+
+            <div onclick="switchTab('tasks', 'Cần sửa')" class="bg-statusRevisionBg border border-statusRevisionFg/20 p-3 rounded-xl cursor-pointer active:scale-95 transition-transform">
+              <div class="flex justify-between items-center text-statusRevisionFg mb-2">
+                <span class="text-xs font-bold">Cần sửa</span>
+                <span class="material-symbols-outlined text-lg">build_circle</span>
+              </div>
+              <span class="text-2xl font-bold text-statusRevisionFg">1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div>
+          <h4 class="text-xs font-bold text-outline uppercase tracking-wider mb-2">THAO TÁC NHANH</h4>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="switchTab('attendance')" class="bg-primary text-white py-3 rounded-xl font-bold text-xs flex flex-col items-center gap-1 active:scale-95 transition-all shadow-sm">
+              <span class="material-symbols-outlined text-xl">location_on</span>
+              <span>Điểm danh</span>
+            </button>
+            <button onclick="switchTab('tasks')" class="bg-primary-container text-white py-3 rounded-xl font-bold text-xs flex flex-col items-center gap-1 active:scale-95 transition-all shadow-sm">
+              <span class="material-symbols-outlined text-xl">assignment</span>
+              <span>Việc của tôi</span>
+            </button>
+            <button onclick="switchTab('notifications')" class="bg-slate-700 text-white py-3 rounded-xl font-bold text-xs flex flex-col items-center gap-1 active:scale-95 transition-all shadow-sm">
+              <span class="material-symbols-outlined text-xl">notifications</span>
+              <span>Thông báo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Tasks List -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold text-outline uppercase tracking-wider">CÔNG VIỆC GẦN ĐÂY</h4>
+            <button onclick="switchTab('tasks')" class="text-xs text-primary font-bold">Xem tất cả</button>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Task 1 Card -->
+            <div onclick="openTaskDetail(101)" class="bg-surface p-3.5 rounded-xl border border-outline-variant shadow-sm cursor-pointer hover:border-primary transition-colors">
+              <div class="flex justify-between items-start mb-1">
+                <span class="text-[11px] font-bold text-outline">#TS-1234</span>
+                <span class="bg-statusPendingBg text-statusPendingFg text-[10px] font-bold px-2 py-0.5 rounded-md">CHỜ THỰC HIỆN</span>
+              </div>
+              <h5 class="text-sm font-bold text-on-surface leading-tight mb-2">Bảo trì hệ thống điện trạm A</h5>
+              <div class="text-xs text-on-surface-variant space-y-1 mb-2">
+                <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span><span>Quận 1, TP.HCM</span></div>
+                <div class="flex items-center gap-1 text-error font-semibold"><span class="material-symbols-outlined text-sm">calendar_today</span><span>Hạn: 17:00 - 25/10/2023</span></div>
+              </div>
+              <div class="flex justify-between items-center text-xs text-outline border-t border-slate-100 pt-2">
+                <span>QL: Nguyễn Văn A</span>
+                <span class="text-primary font-bold flex items-center">Chi tiết <span class="material-symbols-outlined text-sm">chevron_right</span></span>
+              </div>
+            </div>
+
+            <!-- Task 2 Card -->
+            <div onclick="openTaskDetail(102)" class="bg-surface p-3.5 rounded-xl border border-outline-variant shadow-sm cursor-pointer hover:border-primary transition-colors">
+              <div class="flex justify-between items-start mb-1">
+                <span class="text-[11px] font-bold text-outline">#TS-1235</span>
+                <span class="bg-statusInProgressBg text-statusInProgressFg text-[10px] font-bold px-2 py-0.5 rounded-md">ĐANG LÀM</span>
+              </div>
+              <h5 class="text-sm font-bold text-on-surface leading-tight mb-2">Kiểm tra định kỳ tủ điện lộ B</h5>
+              <div class="text-xs text-on-surface-variant space-y-1 mb-2">
+                <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span><span>Quận 7, TP.HCM</span></div>
+                <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_today</span><span>Hạn: 18:00 - 26/10/2023</span></div>
+              </div>
+              <div class="flex justify-between items-center text-xs text-outline border-t border-slate-100 pt-2">
+                <span>QL: Trần Thị B</span>
+                <span class="text-primary font-bold flex items-center">Chi tiết <span class="material-symbols-outlined text-sm">chevron_right</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 3. SCREEN: TASK LIST ================= -->
+      <div id="screen-tasks" class="screen-page hidden p-4 space-y-3 pb-20">
+        <!-- Search input -->
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-lg">search</span>
+          <input type="text" id="taskSearch" onkeyup="filterTasks()" placeholder="Tìm mã hoặc tên công việc..." class="w-full pl-10 pr-3 py-2 bg-surface border border-outline-variant rounded-xl text-xs outline-none focus:border-primary">
+        </div>
+
+        <!-- Filter Chips Tabs -->
+        <div class="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1" id="taskTabs">
+          <button onclick="setTaskFilter('Tất cả', this)" class="task-tab-btn px-3 py-1.5 rounded-full text-xs font-bold bg-primary text-white whitespace-nowrap">Tất cả</button>
+          <button onclick="setTaskFilter('Chờ thực hiện', this)" class="task-tab-btn px-3 py-1.5 rounded-full text-xs font-medium bg-surface border border-outline-variant text-on-surface-variant whitespace-nowrap">Chờ thực hiện</button>
+          <button onclick="setTaskFilter('Đang làm', this)" class="task-tab-btn px-3 py-1.5 rounded-full text-xs font-medium bg-surface border border-outline-variant text-on-surface-variant whitespace-nowrap">Đang làm</button>
+          <button onclick="setTaskFilter('Chờ duyệt', this)" class="task-tab-btn px-3 py-1.5 rounded-full text-xs font-medium bg-surface border border-outline-variant text-on-surface-variant whitespace-nowrap">Chờ duyệt</button>
+          <button onclick="setTaskFilter('Cần sửa', this)" class="task-tab-btn px-3 py-1.5 rounded-full text-xs font-medium bg-surface border border-outline-variant text-on-surface-variant whitespace-nowrap">Cần sửa</button>
+          <button onclick="setTaskFilter('Hoàn thành', this)" class="task-tab-btn px-3 py-1.5 rounded-full text-xs font-medium bg-surface border border-outline-variant text-on-surface-variant whitespace-nowrap">Hoàn thành</button>
+        </div>
+
+        <!-- Task List Items -->
+        <div class="space-y-2.5" id="taskListContainer">
+          <!-- Dynamically populated tasks -->
+        </div>
+      </div>
+
+      <!-- ================= 4. SCREEN: TASK DETAIL ================= -->
+      <div id="screen-task-detail" class="screen-page hidden p-4 space-y-3 pb-24">
+        <button onclick="switchTab('tasks')" class="flex items-center gap-1 text-xs text-primary font-bold mb-1">
+          <span class="material-symbols-outlined text-base">arrow_back</span> Quay lại danh sách
+        </button>
+
+        <div class="bg-surfaceContainerLow p-3 rounded-xl border border-outline-variant text-center">
+          <p class="text-[10px] font-bold text-outline uppercase tracking-wider mb-1">TRẠNG THÁI HIỆN TẠI</p>
+          <span id="detailStatusBadge" class="bg-statusPendingBg text-statusPendingFg text-xs font-bold px-3 py-1 rounded-full uppercase">CHỜ THỰC HIỆN</span>
+        </div>
+
+        <div class="bg-surface p-4 rounded-xl border border-outline-variant space-y-3 shadow-sm">
+          <div class="flex justify-between items-center">
+            <span id="detailCode" class="text-xs font-bold text-primary bg-surfaceContainer px-2 py-0.5 rounded">#TS-1234</span>
+            <span class="text-xs text-outline">Độ ưu tiên: Cao</span>
+          </div>
+
+          <h3 id="detailTitle" class="text-base font-bold text-on-surface leading-snug">Bảo trì hệ thống điện trạm A</h3>
+          <p id="detailDesc" class="text-xs text-on-surface-variant leading-relaxed">Kiểm tra định kỳ thiết bị vô tuyến, hệ thống nguồn điện dự phòng (UPS) và làm sạch bộ lọc gió tại trạm BTS khu vực Quận 1.</p>
+
+          <hr class="border-slate-100">
+
+          <div class="space-y-2 text-xs">
+            <div class="flex gap-2">
+              <span class="material-symbols-outlined text-primary text-base">location_on</span>
+              <div>
+                <p class="font-bold">Vị trí thực hiện</p>
+                <p id="detailLocation" class="text-on-surface-variant">Quận 1, TP. Hồ Chí Minh</p>
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <span class="material-symbols-outlined text-error text-base">event_busy</span>
+              <div>
+                <p class="font-bold">Hạn hoàn thành</p>
+                <p id="detailDeadline" class="text-error font-bold">17:00 - 25/10/2023</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline History -->
+        <div class="bg-surface p-4 rounded-xl border border-outline-variant space-y-2">
+          <h4 class="text-xs font-bold text-outline uppercase tracking-wider flex items-center gap-1 mb-3">
+            <span class="material-symbols-outlined text-base">history</span> LỊCH SỬ XỬ LÝ
+          </h4>
+
+          <div class="space-y-3 text-xs border-l-2 border-primary/20 pl-3 ml-1">
+            <div class="relative">
+              <div class="w-2.5 h-2.5 bg-primary rounded-full absolute -left-[17px] top-1"></div>
+              <div class="flex justify-between font-bold"><span>Khởi tạo công việc</span><span class="text-[10px] text-outline">08:30 - 24/10</span></div>
+              <p class="text-on-surface-variant text-[11px]">Hệ thống tự động tạo lịch bảo trì định kỳ.</p>
+            </div>
+
+            <div class="relative">
+              <div class="w-2.5 h-2.5 bg-primary rounded-full absolute -left-[17px] top-1"></div>
+              <div class="flex justify-between font-bold"><span>Phê duyệt & Điều phối</span><span class="text-[10px] text-outline">09:15 - 24/10</span></div>
+              <p class="text-on-surface-variant text-[11px]">Quản lý đã gán công việc cho Đội kỹ thuật 04.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Action Button -->
+        <div class="fixed bottom-14 left-0 w-full p-4 bg-surface border-t border-outline-variant z-40" id="detailActionBox">
+          <button id="btnStartTask" onclick="startTaskAction()" class="w-full py-3 bg-primary text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-lg">play_arrow</span>
+            <span>BẮT ĐẦU CÔNG VIỆC</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= 5. SCREEN: ATTENDANCE ================= -->
+      <div id="screen-attendance" class="screen-page hidden p-4 space-y-3 pb-20">
+        <!-- Fake GPS Simulation Toggle -->
+        <div class="bg-surfaceContainerLow p-2.5 rounded-xl border border-outline-variant flex justify-between items-center text-xs">
+          <span class="font-bold flex items-center gap-1"><span class="material-symbols-outlined text-base text-outline">bug_report</span> Test Fake GPS:</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="fakeGpsToggle" onchange="toggleFakeGps(this.checked)" class="sr-only peer">
+            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-error"></div>
+          </label>
+        </div>
+
+        <!-- Fake GPS Alert -->
+        <div id="fakeGpsAlert" class="hidden bg-errorContainer border border-error p-3 rounded-xl text-error text-xs flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">warning</span>
+          <p class="font-bold">CẢNH BÁO: Phát hiện thiết bị sử dụng GPS giả lập! Điểm danh bị từ chối.</p>
+        </div>
+
+        <!-- GPS Card -->
+        <div class="bg-surface p-4 rounded-xl border border-outline-variant space-y-2 shadow-sm">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface flex items-center gap-1">
+              <span class="material-symbols-outlined text-primary text-base">my_location</span> VỊ TRÍ HIỆN TẠI (GPS)
+            </span>
+            <button onclick="refreshGps()" class="text-[11px] text-primary font-bold flex items-center gap-0.5">
+              <span class="material-symbols-outlined text-sm">refresh</span> Lấy lại
+            </button>
+          </div>
+          <p id="gpsAddress" class="text-xs font-bold text-primary">Khu công nghệ cao, Phường Tân Phú, TP.Thủ Đức, TP.HCM</p>
+          <p id="gpsCoords" class="text-[11px] text-outline">Tọa độ: 10.7769° N, 106.7009° E</p>
+        </div>
+
+        <!-- Selfie Upload Box -->
+        <div class="bg-surface p-4 rounded-xl border border-outline-variant text-center space-y-2">
+          <p class="text-xs font-bold text-outline uppercase">ẢNH CHỤP SELFIE HIỆN TRƯỜNG</p>
+          <div id="selfieContainer" onclick="takeSelfieMock()" class="h-36 border-2 border-dashed border-primary rounded-xl bg-surfaceContainerLow flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100">
+            <span class="material-symbols-outlined text-3xl text-primary mb-1">camera_alt</span>
+            <p class="text-xs font-bold text-primary">Bấm để chụp ảnh Selfie</p>
+            <p class="text-[10px] text-outline">(Mở camera nhận diện)</p>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <textarea id="checkinNotes" placeholder="Nhập ghi chú tình hình hiện trường..." class="w-full p-3 bg-surface border border-outline-variant rounded-xl text-xs outline-none focus:border-primary h-20 resize-none"></textarea>
+
+        <!-- Checkin Button -->
+        <button onclick="submitCheckin()" class="w-full py-3.5 bg-primary text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-lg">check_circle</span>
+          <span>ĐIỂM DANH NGAY</span>
+        </button>
+
+        <!-- Success Modal simulated -->
+        <div id="checkinSuccessBox" class="hidden bg-statusCompletedBg border border-statusCompletedFg p-4 rounded-xl text-statusCompletedFg text-center space-y-2">
+          <span class="material-symbols-outlined text-4xl active-icon">check_circle</span>
+          <h4 class="text-sm font-bold">ĐIỂM DANH THÀNH CÔNG!</h4>
+          <p id="checkinTime" class="text-xs font-semibold">Thời gian: 09:41 - 21/07/2026</p>
+        </div>
+      </div>
+
+      <!-- ================= 6. SCREEN: REPORT COMPLETION ================= -->
+      <div id="screen-report" class="screen-page hidden p-4 space-y-3 pb-24">
+        <button onclick="switchTab('tasks')" class="flex items-center gap-1 text-xs text-primary font-bold mb-1">
+          <span class="material-symbols-outlined text-base">arrow_back</span> Hủy báo cáo
+        </button>
+
+        <div class="bg-surface p-3.5 rounded-xl border border-outline-variant space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-bold text-outline">CÔNG VIỆC THỰC HIỆN</span>
+            <span class="text-xs font-bold text-primary">#TS-1235</span>
+          </div>
+          <h4 class="text-xs font-bold text-on-surface">Kiểm tra định kỳ tủ điện lộ B</h4>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant block">Ghi chú hoàn thành *</label>
+          <textarea id="reportNotes" placeholder="Mô tả chi tiết kết quả xử lý, các sự cố phát sinh..." class="w-full p-3 bg-surface border border-outline-variant rounded-xl text-xs outline-none focus:border-primary h-28 resize-none"></textarea>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-bold text-on-surface-variant">Hình ảnh minh chứng</span>
+            <span id="photoCounter" class="text-xs text-outline">0/6 ảnh</span>
+          </div>
+
+          <div class="flex gap-2 mb-2">
+            <button onclick="addProofPhoto()" class="flex-1 py-2.5 border-2 border-primary text-primary font-bold text-xs rounded-xl flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-base">photo_camera</span> CHỤP ÁNH
+            </button>
+            <button onclick="addProofPhoto()" class="flex-1 py-2.5 border border-outline-variant text-on-surface-variant font-bold text-xs rounded-xl flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-base">image</span> THƯ VIỆN
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2" id="proofGrid">
+            <!-- Dynamic photos injected here -->
+          </div>
+        </div>
+
+        <!-- Sticky Submit Button -->
+        <div class="fixed bottom-14 left-0 w-full p-4 bg-surface border-t border-outline-variant z-40">
+          <button onclick="submitCompletionReport()" class="w-full py-3.5 bg-primary text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-lg">send</span>
+            <span>GỬI BÁO CÁO NGAY</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= 7. SCREEN: NOTIFICATIONS ================= -->
+      <div id="screen-notifications" class="screen-page hidden p-4 space-y-3 pb-20">
+        <div class="flex justify-between items-center">
+          <h3 class="text-sm font-bold text-primary">THÔNG BÁO</h3>
+          <button onclick="markAllNotificationsRead()" class="text-xs text-outline font-semibold">Đánh dấu đã đọc</button>
+        </div>
+
+        <div class="flex gap-2 border-b border-outline-variant pb-2">
+          <button onclick="filterNotifs('all', this)" class="notif-tab px-3 py-1 rounded-full text-xs font-bold bg-primary text-white">Tất cả</button>
+          <button onclick="filterNotifs('unread', this)" class="notif-tab px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-on-surface-variant">Chưa đọc (2)</button>
+        </div>
+
+        <div class="space-y-2" id="notifContainer">
+          <!-- Item 1 -->
+          <div onclick="readNotif(this)" class="notif-item bg-primary/10 border-l-4 border-primary p-3 rounded-xl flex gap-3 cursor-pointer">
+            <span class="material-symbols-outlined text-primary text-xl">assignment</span>
+            <div class="flex-1 text-xs">
+              <div class="flex justify-between items-start font-bold">
+                <span class="text-on-surface">Task mới: Kiểm tra trạm điện A1</span>
+                <span class="w-2 h-2 bg-primary rounded-full"></span>
+              </div>
+              <p class="text-on-surface-variant mt-0.5 line-clamp-2">Nhiệm vụ mới cần thực hiện tại khu vực sản xuất A. Hạn chót 17:00 hôm nay.</p>
+              <span class="text-[10px] text-outline mt-1 block">10 phút trước</span>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="notif-item bg-surface border border-outline-variant p-3 rounded-xl flex gap-3 cursor-pointer">
+            <span class="material-symbols-outlined text-amber-600 text-xl">notifications_active</span>
+            <div class="flex-1 text-xs">
+              <span class="font-bold text-on-surface block">Nhắc nhở: Họp giao ban sáng</span>
+              <p class="text-on-surface-variant mt-0.5">Cuộc họp sẽ bắt đầu sau 15 phút nữa tại phòng họp trực tuyến.</p>
+              <span class="text-[10px] text-outline mt-1 block">45 phút trước</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 8. SCREEN: ACCOUNT ================= -->
+      <div id="screen-account" class="screen-page hidden p-4 space-y-4 pb-20">
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-primary to-primary-container p-5 rounded-2xl text-white text-center shadow-md">
+          <div class="w-16 h-16 rounded-full bg-white/20 mx-auto mb-2 flex items-center justify-center">
+            <span class="material-symbols-outlined text-3xl active-icon">person</span>
+          </div>
+          <h3 class="text-base font-bold">NGUYỄN VẢN AN</h3>
+          <span class="inline-block mt-1 px-3 py-0.5 bg-white/20 rounded-full text-[10px] font-bold tracking-wider">ID: NV-2024-889</span>
+        </div>
+
+        <!-- Personal Info List -->
+        <div class="bg-surface rounded-xl border border-outline-variant overflow-hidden text-xs">
+          <div class="p-3 bg-slate-50 border-b border-outline-variant font-bold text-primary">THÔNG TIN CÁ NHÂN</div>
+          <div class="divide-y divide-slate-100">
+            <div class="p-3 flex justify-between items-center">
+              <span class="text-outline">Email</span>
+              <span class="font-semibold text-on-surface">an.nguyen@titsmart.vn</span>
+            </div>
+            <div class="p-3 flex justify-between items-center">
+              <span class="text-outline">Số điện thoại</span>
+              <span class="font-semibold text-on-surface">090 123 4567</span>
+            </div>
+            <div class="p-3 flex justify-between items-center">
+              <span class="text-outline">Vai trò</span>
+              <span class="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">Thợ chính / Quản lý tổ đội</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Settings -->
+        <div class="bg-surface rounded-xl border border-outline-variant overflow-hidden text-xs">
+          <div class="p-3 bg-slate-50 border-b border-outline-variant font-bold text-primary">CÀI ĐẶT HỆ THỐNG</div>
+          <div class="divide-y divide-slate-100">
+            <div class="p-3 flex justify-between items-center cursor-pointer hover:bg-slate-50">
+              <span class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500">lock_reset</span> Đổi mật khẩu</span>
+              <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+            </div>
+            <div class="p-3 flex justify-between items-center cursor-pointer hover:bg-slate-50">
+              <span class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500">language</span> Ngôn ngữ</span>
+              <span class="text-outline flex items-center">Tiếng Việt <span class="material-symbols-outlined text-slate-400">chevron_right</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logout Button -->
+        <button onclick="handleLogout()" class="w-full py-3 border-2 border-error text-error font-bold text-xs rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-lg">logout</span>
+          <span>ĐĂNG XUẤT</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR (Static Footer) -->
+    <nav id="bottomNav" class="hidden bg-surface border-t border-outline-variant flex justify-around items-center h-14 z-50">
+      <button onclick="switchTab('dashboard')" class="nav-item flex flex-col items-center justify-center text-primary font-bold text-[10px]">
+        <span class="material-symbols-outlined text-xl active-icon">home</span>
+        <span>Trang chủ</span>
+      </button>
+
+      <button onclick="switchTab('tasks')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant text-[10px]">
+        <span class="material-symbols-outlined text-xl">assignment</span>
+        <span>Công việc</span>
+      </button>
+
+      <button onclick="switchTab('attendance')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant text-[10px]">
+        <span class="material-symbols-outlined text-xl">location_on</span>
+        <span>Điểm danh</span>
+      </button>
+
+      <button onclick="switchTab('notifications')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant text-[10px] relative">
+        <span class="material-symbols-outlined text-xl">notifications</span>
+        <span class="absolute top-1 right-3 w-2 h-2 bg-error rounded-full"></span>
+        <span>Thông báo</span>
+      </button>
+
+      <button onclick="switchTab('account')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant text-[10px]">
+        <span class="material-symbols-outlined text-xl">person</span>
+        <span>Tài khoản</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- JAVASCRIPT EMULATOR LOGIC -->
+  <script>
+    const mockTasks = [
+      { id: 101, code: '#TS-1234', title: 'Bảo trì hệ thống điện trạm A', location: 'Quận 1, TP.HCM', deadline: '17:00 - 25/10/2023', status: 'Chờ thực hiện', manager: 'Nguyễn Văn A', bg: 'bg-statusPendingBg', fg: 'text-statusPendingFg' },
+      { id: 102, code: '#TS-1235', title: 'Kiểm tra định kỳ tủ điện lộ B', location: 'Quận 7, TP.HCM', deadline: '18:00 - 26/10/2023', status: 'Đang làm', manager: 'Trần Thị B', bg: 'bg-statusInProgressBg', fg: 'text-statusInProgressFg' },
+      { id: 103, code: '#TS-1236', title: 'Báo cáo nghiệm thu trạm biến áp C', location: 'Quận Bình Thạnh, TP.HCM', deadline: '12:00 - 24/10/2023', status: 'Chờ duyệt', manager: 'Lê Văn C', bg: 'bg-statusApprovalBg', fg: 'text-statusApprovalFg' },
+      { id: 104, code: '#TS-1238', title: 'Thay thế biến áp cũ Trạm X', location: 'TP.Thủ Đức, TP.HCM', deadline: '16:00 - 23/10/2023', status: 'Cần sửa', manager: 'Lê Văn C', bg: 'bg-statusRevisionBg', fg: 'text-statusRevisionFg' },
+      { id: 105, code: '#TS-1240', title: 'Sửa chữa hệ thống tiếp địa khu Y', location: 'Quận 9, TP.HCM', deadline: '17:00 - 20/10/2023', status: 'Hoàn thành', manager: 'Phạm Văn D', bg: 'bg-statusCompletedBg', fg: 'text-statusCompletedFg' }
+    ];
+
+    let proofPhotos = [];
+
+    function handleLogin() {
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('bottomNav').classList.remove('hidden');
+      switchTab('dashboard');
+    }
+
+    function handleLogout() {
+      if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+        document.getElementById('bottomNav').classList.add('hidden');
+        document.querySelectorAll('.screen-page').forEach(s => s.classList.add('hidden'));
+        document.getElementById('screen-login').classList.remove('hidden');
+      }
+    }
+
+    function togglePassVis() {
+      const p = document.getElementById('loginPass');
+      const i = document.getElementById('passVisIcon');
+      if (p.type === 'password') { p.type = 'text'; i.innerText = 'visibility_off'; }
+      else { p.type = 'password'; i.innerText = 'visibility'; }
+    }
+
+    function switchTab(tabId, filter = 'Tất cả') {
+      document.querySelectorAll('.screen-page').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-' + tabId).classList.remove('hidden');
+
+      // Update Nav active style
+      const navBtns = document.querySelectorAll('#bottomNav button');
+      navBtns.forEach((btn, idx) => {
+        btn.classList.remove('text-primary', 'font-bold');
+        btn.classList.add('text-on-surface-variant');
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (icon) icon.classList.remove('active-icon');
+
+        if ((tabId === 'dashboard' && idx === 0) ||
+            (tabId === 'tasks' && idx === 1) ||
+            (tabId === 'attendance' && idx === 2) ||
+            (tabId === 'notifications' && idx === 3) ||
+            (tabId === 'account' && idx === 4)) {
+          btn.classList.add('text-primary', 'font-bold');
+          btn.classList.remove('text-on-surface-variant');
+          if (icon) icon.classList.add('active-icon');
+        }
+      });
+
+      if (tabId === 'tasks') {
+        renderTasks(filter);
+      }
+    }
+
+    function renderTasks(filter = 'Tất cả') {
+      const container = document.getElementById('taskListContainer');
+      container.innerHTML = '';
+
+      const filtered = mockTasks.filter(t => filter === 'Tất cả' || t.status === filter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-outline text-xs"><span class="material-symbols-outlined text-3xl mb-1 block">assignment_late</span>Không có công việc nào</div>';
+        return;
+      }
+
+      filtered.forEach(task => {
+        container.innerHTML += `
+          <div onclick="openTaskDetail(${task.id})" class="bg-surface p-3.5 rounded-xl border border-outline-variant shadow-sm cursor-pointer hover:border-primary transition-colors">
+            <div class="flex justify-between items-start mb-1">
+              <span class="text-[11px] font-bold text-outline">${task.code}</span>
+              <span class="${task.bg} ${task.fg} text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">${task.status}</span>
+            </div>
+            <h5 class="text-xs font-bold text-on-surface leading-tight mb-2">${task.title}</h5>
+            <div class="text-[11px] text-on-surface-variant space-y-1 mb-2">
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span><span>${task.location}</span></div>
+              <div class="flex items-center gap-1 text-error"><span class="material-symbols-outlined text-sm">calendar_today</span><span>Hạn: ${task.deadline}</span></div>
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-outline border-t border-slate-100 pt-2">
+              <span>QL: ${task.manager}</span>
+              <span class="text-primary font-bold flex items-center">Chi tiết <span class="material-symbols-outlined text-sm">chevron_right</span></span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function openTaskDetail(taskId) {
+      const task = mockTasks.find(t => t.id === taskId) || mockTasks[0];
+      document.getElementById('detailCode').innerText = task.code;
+      document.getElementById('detailTitle').innerText = task.title;
+      document.getElementById('detailLocation').innerText = task.location;
+      document.getElementById('detailDeadline').innerText = task.deadline;
+      
+      const badge = document.getElementById('detailStatusBadge');
+      badge.innerText = task.status.toUpperCase();
+      badge.className = `${task.bg} ${task.fg} text-xs font-bold px-3 py-1 rounded-full uppercase`;
+
+      const actionBox = document.getElementById('detailActionBox');
+      if (task.status === 'Đang làm') {
+        actionBox.innerHTML = `<button onclick="switchTab('report')" class="w-full py-3 bg-primaryContainer text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">send</span><span>GỬI BÁO CÁO HOÀN THÀNH</span></button>`;
+      } else if (task.status === 'Chờ duyệt') {
+        actionBox.innerHTML = `<div class="w-full py-3 bg-statusApprovalBg text-statusApprovalFg font-bold text-xs rounded-xl text-center">ĐÃ GỬI BÁO CÁO • ĐANG CHỜ DUYỆT</div>`;
+      } else {
+        actionBox.innerHTML = `<button onclick="startTaskAction()" class="w-full py-3 bg-primary text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">play_arrow</span><span>BẮT ĐẦU CÔNG VIỆC</span></button>`;
+      }
+
+      document.querySelectorAll('.screen-page').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-task-detail').classList.remove('hidden');
+    }
+
+    function startTaskAction() {
+      alert('Đã bắt đầu công việc! Trạng thái chuyển sang: ĐANG LÀM.');
+      openTaskDetail(102);
+    }
+
+    function toggleFakeGps(checked) {
+      const alert = document.getElementById('fakeGpsAlert');
+      if (checked) alert.classList.remove('hidden');
+      else alert.classList.add('hidden');
+    }
+
+    function refreshGps() {
+      document.getElementById('gpsCoords').innerText = `Tọa độ: 10.${7700 + Math.floor(Math.random()*100)}° N, 106.${7000 + Math.floor(Math.random()*100)}° E`;
+    }
+
+    function takeSelfieMock() {
+      const container = document.getElementById('selfieContainer');
+      container.innerHTML = `<div class="text-center text-primary font-bold text-xs"><span class="material-symbols-outlined text-4xl mb-1 block active-icon">face_retouching_natural</span>Đã chụp ảnh selfie khuôn mặt</div>`;
+      container.classList.remove('border-dashed');
+      container.classList.add('bg-blue-50');
+    }
+
+    function submitCheckin() {
+      const isFake = document.getElementById('fakeGpsToggle').checked;
+      if (isFake) {
+        alert('CẢNH BÁO: Phát hiện thiết bị dùng GPS giả lập! Điểm danh bị từ chối.');
+        return;
+      }
+      document.getElementById('checkinSuccessBox').classList.remove('hidden');
+    }
+
+    function addProofPhoto() {
+      if (proofPhotos.length >= 6) return alert('Tối đa 6 ảnh!');
+      proofPhotos.push(`Ảnh ${proofPhotos.length + 1}`);
+      document.getElementById('photoCounter').innerText = `${proofPhotos.length}/6 ảnh`;
+      
+      const grid = document.getElementById('proofGrid');
+      grid.innerHTML = '';
+      proofPhotos.forEach((p, idx) => {
+        grid.innerHTML += `<div class="bg-blue-50 border border-primary/30 h-20 rounded-lg flex items-center justify-center text-[10px] font-bold text-primary relative"><span>${p}</span></div>`;
+      });
+    }
+
+    function submitCompletionReport() {
+      const notes = document.getElementById('reportNotes').value;
+      if (!notes.trim()) return alert('Vui lòng nhập ghi chú hoàn thành!');
+      alert('Gửi báo cáo thành công! Công việc đã chuyển sang trạng thái "Chờ duyệt".');
+      switchTab('tasks', 'Chờ duyệt');
+    }
+  </script>
+
+</body>
+</html>
