@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    AppRepository().initializeDemoData();
+    AppRepository().refreshAllData();
     AppRepository().addListener(_onRepositoryChanged);
   }
 
@@ -52,10 +52,13 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final repo = AppRepository();
     final user = repo.currentUser;
-    final isManager = user?.isManager ?? true;
 
-    // Define Role-specific Pages & Bottom Navigation Items
-    final List<Widget> managerPages = [
+    final isDirector = user?.isDirector ?? false;
+    final isManagerOnly = user?.isManagerOnly ?? false;
+
+    // Define Pages based on Role Requirements:
+    // 1. Sếp / Admin: Tổng quan, Công việc, Nhân sự, Báo cáo, Tài khoản
+    final List<Widget> directorPages = [
       DashboardScreen(onNavigateTab: _onTabTapped),
       const TaskListScreen(),
       const StaffListScreen(),
@@ -63,6 +66,17 @@ class _MainScreenState extends State<MainScreen> {
       const AccountScreen(),
     ];
 
+    // 2. Quản lý: Tổng quan, Công việc, Nhân sự đội, Báo cáo, Điểm danh, Tài khoản
+    final List<Widget> managerPages = [
+      DashboardScreen(onNavigateTab: _onTabTapped),
+      const TaskListScreen(),
+      const StaffListScreen(),
+      const ManagerReportsScreen(),
+      const AttendanceScreen(),
+      const AccountScreen(),
+    ];
+
+    // 3. Nhân viên / Thợ: Trang chủ, Việc của tôi, Điểm danh, Thông báo, Tài khoản
     final List<Widget> workerPages = [
       DashboardScreen(onNavigateTab: _onTabTapped),
       const TaskListScreen(),
@@ -71,14 +85,15 @@ class _MainScreenState extends State<MainScreen> {
       const AccountScreen(),
     ];
 
-    final pages = isManager ? managerPages : workerPages;
+    final pages = isDirector
+        ? directorPages
+        : (isManagerOnly ? managerPages : workerPages);
 
-    // Ensure _currentIndex doesn't overflow when switching roles
     if (_currentIndex >= pages.length) {
       _currentIndex = 0;
     }
 
-    final managerNavItems = [
+    final directorNavItems = [
       const BottomNavigationBarItem(
         icon: Icon(Icons.dashboard_outlined),
         activeIcon: Icon(Icons.dashboard),
@@ -98,6 +113,39 @@ class _MainScreenState extends State<MainScreen> {
         icon: Icon(Icons.analytics_outlined),
         activeIcon: Icon(Icons.analytics),
         label: 'Báo cáo',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.person_outline),
+        activeIcon: Icon(Icons.person),
+        label: 'Tài khoản',
+      ),
+    ];
+
+    final managerNavItems = [
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.dashboard_outlined),
+        activeIcon: Icon(Icons.dashboard),
+        label: 'Tổng quan',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.assignment_outlined),
+        activeIcon: Icon(Icons.assignment),
+        label: 'Công việc',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.badge_outlined),
+        activeIcon: Icon(Icons.badge),
+        label: 'Nhân sự đội',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.analytics_outlined),
+        activeIcon: Icon(Icons.analytics),
+        label: 'Báo cáo',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.camera_alt_outlined),
+        activeIcon: Icon(Icons.camera_alt),
+        label: 'Điểm danh',
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.person_outline),
@@ -168,6 +216,10 @@ class _MainScreenState extends State<MainScreen> {
       ),
     ];
 
+    final navItems = isDirector
+        ? directorNavItems
+        : (isManagerOnly ? managerNavItems : workerNavItems);
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -187,9 +239,11 @@ class _MainScreenState extends State<MainScreen> {
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: isManager ? AppColors.primary : AppColors.secondary,
+          selectedItemColor: isDirector
+              ? AppColors.primary
+              : (isManagerOnly ? AppColors.secondary : AppColors.primary),
           unselectedItemColor: AppColors.outline,
-          items: isManager ? managerNavItems : workerNavItems,
+          items: navItems,
         ),
       ),
     );

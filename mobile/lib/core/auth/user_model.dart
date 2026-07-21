@@ -4,7 +4,8 @@ class UserModel {
   final String employeeCode;
   final String email;
   final String phone;
-  final String role; // 'manager', 'admin', 'director', 'worker'
+  final String role; // 'director', 'admin', 'manager', 'worker'
+  final String? status;
   final String? avatarUrl;
   final String? teamName;
   final bool isLocked;
@@ -16,34 +17,49 @@ class UserModel {
     required this.email,
     required this.phone,
     required this.role,
+    this.status,
     this.avatarUrl,
     this.teamName,
     this.isLocked = false,
   });
 
-  bool get isManager {
+  bool get isDirector {
     final r = role.toLowerCase();
-    return r == 'admin' || r == 'director' || r == 'manager' || r == 'sếp' || r == 'quản lý';
+    return r == 'director' || r == 'admin' || r == 'sếp';
   }
 
-  bool get isWorker => !isManager;
+  bool get isManagerOnly {
+    final r = role.toLowerCase();
+    return r == 'manager';
+  }
+
+  bool get isManager {
+    return isDirector || isManagerOnly;
+  }
+
+  bool get isWorker {
+    return !isDirector && !isManagerOnly;
+  }
 
   String get roleDisplayLabel {
-    if (isManager) return 'Quản lý';
-    return 'Nhân viên';
+    if (isDirector) return 'Sếp / Tổng Quản Lý';
+    if (isManagerOnly) return 'Quản Lý';
+    return 'Nhân Viên / Thợ';
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final statusVal = json['status'] ?? 'active';
     return UserModel(
       id: json['id'] ?? 1,
-      name: json['name'] ?? 'Nguyễn Văn An',
-      employeeCode: json['employee_code'] ?? 'NV-2024-889',
-      email: json['email'] ?? 'an.nguyen@titsmart.vn',
-      phone: json['phone'] ?? '090 123 4567',
+      name: json['name'] ?? '',
+      employeeCode: json['employee_code'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
       role: json['role'] ?? 'worker',
+      status: statusVal,
       avatarUrl: json['avatar_url'],
-      teamName: json['team_name'] ?? 'Đội kỹ thuật 1',
-      isLocked: json['is_locked'] ?? false,
+      teamName: json['team'] != null ? json['team']['name'] : json['team_name'],
+      isLocked: statusVal == 'inactive' || (json['is_locked'] ?? false),
     );
   }
 
@@ -55,6 +71,7 @@ class UserModel {
       'email': email,
       'phone': phone,
       'role': role,
+      'status': status,
       'avatar_url': avatarUrl,
       'team_name': teamName,
       'is_locked': isLocked,
@@ -68,6 +85,7 @@ class UserModel {
     String? email,
     String? phone,
     String? role,
+    String? status,
     String? avatarUrl,
     String? teamName,
     bool? isLocked,
@@ -79,6 +97,7 @@ class UserModel {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       role: role ?? this.role,
+      status: status ?? this.status,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       teamName: teamName ?? this.teamName,
       isLocked: isLocked ?? this.isLocked,

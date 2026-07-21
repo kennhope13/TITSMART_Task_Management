@@ -9,6 +9,32 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $query = Attendance::query()
+            ->with(['user:id,name,employee_code,role', 'team:id,name'])
+            ->when($user->isManager(), function ($q) use ($user) {
+                $q->whereIn('user_id', \App\Models\User::where('manager_id', $user->id)->pluck('id'));
+            })
+            ->when($user->isWorker(), function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->when($request->filled('date'), fn ($q) => $q->whereDate('check_in_at', $request->string('date')));
+
+        return response()->json($query->latest()->paginate($request->integer('per_page', 20)));
+    }
+
+    public function myHistory(Request $request): JsonResponse
+    {
+        $history = Attendance::where('user_id', $request->user()->id)
+            ->latest('check_in_at')
+            ->paginate($request->integer('per_page', 20));
+
+        return response()->json($history);
+    }
+
     public function checkIn(Request $request): JsonResponse
     {
         $data = $request->validate([
